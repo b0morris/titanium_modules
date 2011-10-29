@@ -8,7 +8,7 @@
 #import "TiBase.h"
 #import "TiHost.h"
 #import "TiUtils.h"
-#import "FlurryAPI.h"
+#import "FlurryAnalytics.h"
 
 @implementation TiFlurryModule
 
@@ -38,16 +38,32 @@
 -(void)initialize:(id)args
 {
 	ENSURE_SINGLE_ARG(args,NSString);
-	[FlurryAPI startSession:args];
-	NSDictionary *dict = [NSDictionary dictionaryWithObject:NUMINT([FlurryAPI version]) forKey:@"version"];
-	[TiUtils queueAnalytics:@"app.feature" name:@"ti.module.flurry" data:dict];
+	[FlurryAnalytics startSession:args];
 }
 
 -(void)reportOnClose:(id)value
 {
 	ENSURE_SINGLE_ARG(value,NSObject);
 	BOOL yn = [TiUtils boolValue:value];
-	[FlurryAPI setSessionReportsOnCloseEnabled:yn];
+	[FlurryAnalytics setSessionReportsOnCloseEnabled:yn];
+}
+
+-(void)setUserId:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSString);
+    [FlurryAnalytics setUserID:[args objectAtIndex:0]];
+}
+
+-(void)setAge:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSObject);
+    [FlurryAnalytics setAge:[TiUtils intValue:[args objectAtIndex:0]]];
+}
+
+-(void)setGender:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSString);
+    [FlurryAnalytics setGender:[TiUtils stringValue:[args objectAtIndex:0]]];
 }
 
 -(void)logEvent:(id)args
@@ -60,14 +76,40 @@
 	}
 	if (props==nil)
 	{
-		[FlurryAPI logEvent:event];
+		[FlurryAnalytics logEvent:event];
 	}
 	else 
 	{
-		[FlurryAPI logEvent:event withParameters:props];
+		[FlurryAnalytics logEvent:event withParameters:props];
 	}
-	[TiUtils queueAnalytics:@"app.user" name:event data:props];
 }
+
+-(void)logTimedEvent:(id)args
+{
+	NSString *event = [args objectAtIndex:0];
+	NSDictionary *props = nil;
+	if ([args count] > 1)
+	{
+		props = [args objectAtIndex:1];
+	}
+	if (props==nil)
+	{
+		[FlurryAnalytics logEvent:event timed:TRUE];
+	}
+	else 
+	{
+		[FlurryAnalytics logEvent:event withParameters:props timed:TRUE];
+	}
+}
+
+-(void)endTimedEvent:(id)args
+{
+    NSString *event = [args objectAtIndex:0];
+    NSDictionary *props = [args count] > 1 ? [args objectAtIndex:1] : NULL;
+    
+    [FlurryAnalytics endTimedEvent:event withParameters:props];
+}
+
 
 
 @end

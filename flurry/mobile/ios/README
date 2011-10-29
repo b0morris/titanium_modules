@@ -7,11 +7,16 @@ with access to Flurry integration in your Titanium iPhone application.
 Application Initialization
 ---------------------------
 
+Add the following to your tiapp.xml:
+
+    <module version="1.0">ti.flurry</module>
+
 To setup your app, you need to initialize the module with your 
 Flurry application API key.  You should place this command in your 
 app.js:
 
-Titanium.Flurry.initialize("YOUR_API_KEY");
+    var flurry = require("ti.flurry");
+    flurry.initialize("YOUR_API_KEY");
 
 Make sure you replace YOUR_API_KEY with your *actual* key.
 
@@ -20,25 +25,37 @@ That's it for the basics.  You should now receive Flurry analytics data.
 Extra Stuff
 ------------
 
-Forcing Transmission on Shutdown
-
-By default, Flurry will only log upon subsequent runs of the application and 
-caches logged data on the device.  You can force Flurry to attempt to send
-data upon exit of the app by calling the following API:
-
-Titanium.Flurry.reportOnClose(true);
-
 Custom Event Logging
 
 To log events using custom events, you can call the following API:
 
-Titanium.Flurry.logEvent(event_name,parameters);
+    flurry.logEvent(event_name, parameters);
 
 Where `event_name` is a string name of your event and where `parameters` (optional)
-is a Javascript dictionary of key value pairs (JSON serializable) that you want to 
+is a Javascript dictionary of key value pairs (JSON serializable) that you want to
 associate with the event.
 
 
+Timed Event Logging
+
+Logging a timed event is the same as logging an untimed event, only you need to
+manually notify Flurry when the event has ended.
+
+    flurry.logTimedEvent(event_name, parameters);
+    flurry.endTimedEvent(event_name, parameters);
+
+The `parameters` argument is optional in both calls. If supplied in endTimedEvent(),
+it will log the change in that parameter from the initial logTimedEvent() call.
+
+
+Session Parameters
+
+Flurry also allows you to associate a userId, age, and gender with a particular
+session.
+
+    flurry.setUserId(string);
+    flurry.setAge(int);
+    flurry.setGender(string); // m or f
 
 
 Legal
